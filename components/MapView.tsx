@@ -1,42 +1,11 @@
-// import React from "react";
-// import { StyleSheet } from "react-native";
-// import { WebView } from "react-native-webview";
-
-// export default function MyMap() {
-//   const html = `
-//     <!DOCTYPE html>
-//     <html>
-//       <head>
-//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-//         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-//         <style>html, body, #map { height: 100%; margin: 0; }</style>
-//       </head>
-//       <body>
-//         <div id="map"></div>
-//         <script>
-//           var map = L.map('map').setView([28.6139, 77.2090], 13);
-//           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//             maxZoom: 19,
-//           }).addTo(map);
-//           L.marker([28.6139, 77.2090]).addTo(map)
-//             .bindPopup('Delhi')
-//             .openPopup();
-//         </script>
-//       </body>
-//     </html>
-//   `;
-
-//   return <WebView source={{ html }} style={StyleSheet.absoluteFill} />;
-// }
-
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, TextInput } from "react-native";
 import * as Location from "expo-location";
 import { WebView } from "react-native-webview";
 
-export default function MapWithTracking() {
+export default function MapWithRouting() {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [destination, setDestination] = useState("");
   const webviewRef = useRef<WebView>(null);
 
   useEffect(() => {
@@ -44,7 +13,6 @@ export default function MapWithTracking() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") return;
 
-      // Start watching position
       await Location.watchPositionAsync(
         { accuracy: Location.Accuracy.High, distanceInterval: 1 },
         (location) => {
@@ -53,7 +21,6 @@ export default function MapWithTracking() {
             longitude: location.coords.longitude,
           });
 
-          // Update marker in WebView dynamically
           if (webviewRef.current) {
             webviewRef.current.injectJavaScript(`
               if (window.userMarker) {
@@ -67,7 +34,25 @@ export default function MapWithTracking() {
     })();
   }, []);
 
-  if (!coords) return null; // or loading
+  useEffect(() => {
+    if (destination && coords && webviewRef.current) {
+      webviewRef.current.injectJavaScript(`
+        if (window.routeControl) {
+          window.map.removeControl(window.routeControl);
+        }
+        window.routeControl = L.Routing.control({
+          waypoints: [
+            L.latLng(${coords.latitude}, ${coords.longitude}),
+            L.latLng('${destination.split(",")[0]}', '${destination.split(",")[1]}')
+          ],
+          routeWhileDragging: false,
+          showAlternatives: true
+        }).addTo(window.map);
+      `);
+    }
+  }, [destination, coords]);
+
+  if (!coords) return null;
 
   const html = `
     <!DOCTYPE html>
@@ -75,7 +60,9 @@ export default function MapWithTracking() {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
         <style>html, body, #map { height: 100%; margin: 0; }</style>
       </head>
       <body>
@@ -89,5 +76,15 @@ export default function MapWithTracking() {
     </html>
   `;
 
-  return <WebView ref={webviewRef} source={{ html }} style={StyleSheet.absoluteFill} />;
+  return (
+    <View style={{ flex: 1 }}>
+      <TextInput
+        placeholder="Enter destination lat,lng"
+        style={{ height: 50, borderColor: "gray", borderWidth: 1, padding: 10 }}
+        value={destination}
+        onChangeText={setDestination}
+      />
+      <WebView ref={webviewRef} source={{ html }} style={StyleSheet.absoluteFill} />
+    </View>
+  );
 }
