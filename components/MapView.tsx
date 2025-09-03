@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View, TextInput } from "react-native";
+import { StyleSheet, View, TextInput, Text } from "react-native";
 import * as Location from "expo-location";
 import { WebView } from "react-native-webview";
 
@@ -36,19 +36,25 @@ export default function MapWithRouting() {
 
   useEffect(() => {
     if (destination && coords && webviewRef.current) {
-      webviewRef.current.injectJavaScript(`
-        if (window.routeControl) {
-          window.map.removeControl(window.routeControl);
-        }
-        window.routeControl = L.Routing.control({
-          waypoints: [
-            L.latLng(${coords.latitude}, ${coords.longitude}),
-            L.latLng('${destination.split(",")[0]}', '${destination.split(",")[1]}')
-          ],
-          routeWhileDragging: false,
-          showAlternatives: true
-        }).addTo(window.map);
-      `);
+      const [latStr, lngStr] = destination.split(",");
+      const destLat = parseFloat(latStr.trim());
+      const destLng = parseFloat(lngStr.trim());
+
+      if (!isNaN(destLat) && !isNaN(destLng)) {
+        webviewRef.current.injectJavaScript(`
+          if (window.routeControl) {
+            window.map.removeControl(window.routeControl);
+          }
+          window.routeControl = L.Routing.control({
+            waypoints: [
+              L.latLng(${coords.latitude}, ${coords.longitude}),
+              L.latLng(${destLat}, ${destLng})
+            ],
+            routeWhileDragging: false,
+            showAlternatives: true
+          }).addTo(window.map);
+        `);
+      }
     }
   }, [destination, coords]);
 
@@ -78,13 +84,41 @@ export default function MapWithRouting() {
 
   return (
     <View style={{ flex: 1 }}>
-      <TextInput
-        placeholder="Enter destination lat,lng"
-        style={{ height: 50, borderColor: "gray", borderWidth: 1, padding: 10 }}
-        value={destination}
-        onChangeText={setDestination}
-      />
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Enter destination coordinates</Text>
+        <TextInput
+          placeholder="e.g. 37.7749,-122.4194"
+          keyboardType="numbers-and-punctuation"
+          style={styles.input}
+          value={destination}
+          onChangeText={setDestination}
+        />
+      </View>
       <WebView ref={webviewRef} source={{ html }} style={StyleSheet.absoluteFill} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    backgroundColor: "#fff",
+    padding: 12,
+    borderBottomColor: "#ddd",
+    borderBottomWidth: 1,
+    zIndex: 1,
+  },
+  label: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 6,
+    fontWeight: "500",
+  },
+  input: {
+    height: 45,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+});

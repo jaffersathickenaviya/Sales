@@ -11,6 +11,8 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo/config-plugins": "~10.1.1",
+    "@expo/prebuild-config": "~9.0.0",
     "@expo/vector-icons": "^14.1.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
@@ -32,8 +34,10 @@
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.11",
     "expo-web-browser": "~14.2.0",
+    "gitignore": "^0.7.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-native": "0.79.5",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-maps": "1.20.1",
     "react-native-maps-osmdroid": "^0.26.1-rc1",
