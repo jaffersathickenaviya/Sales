@@ -61,26 +61,43 @@ export default function MapWithRouting() {
   if (!coords) return null;
 
   const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-        <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-        <style>html, body, #map { height: 100%; margin: 0; }</style>
-      </head>
-      <body>
-        <div id="map"></div>
-        <script>
-          window.map = L.map('map').setView([${coords.latitude}, ${coords.longitude}], 15);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-          window.userMarker = L.marker([${coords.latitude}, ${coords.longitude}]).addTo(map).bindPopup('You are here').openPopup();
-        </script>
-      </body>
-    </html>
-  `;
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <style>
+      html, body, #map { height: 100%; margin: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      // Initialize map
+      window.map = L.map('map', {
+        zoomControl: false // disable default top-left zoom control
+      }).setView([${coords.latitude}, ${coords.longitude}], 15);
+
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+      // Add zoom control in bottom-right
+      L.control.zoom({
+        position: 'bottomright'
+      }).addTo(map);
+
+      // Add user marker
+      window.userMarker = L.marker([${coords.latitude}, ${coords.longitude}])
+        .addTo(map)
+        .bindPopup('You are here')
+        .openPopup();
+    </script>
+  </body>
+</html>
+`;
 
   return (
     <View style={{ flex: 1 }}>
