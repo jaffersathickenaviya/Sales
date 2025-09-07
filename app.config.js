@@ -1,21 +1,47 @@
-import 'dotenv/config';
-
-export default {
+module.exports = {
   expo: {
-    name: "salesTrack-app",
+    name: "Sales02",
     slug: "salesTrack-app",
-    scheme: "salesTrack-app",
     version: "1.0.0",
-    android: {
-      config: {
-        googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY,
-        },
-      },
-    },
+    orientation: "portrait",
+    icon: "./assets/images/icon.png",
+    scheme: "sales02",
+    userInterfaceStyle: "automatic",
+    newArchEnabled: true,
     ios: {
-      config: {
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      supportsTablet: true,
+    },
+    android: {
+      package: "com.jafferenav.salestrack",
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/adaptive-icon.png",
+        backgroundColor: "#ffffff",
+      },
+      edgeToEdgeEnabled: true,
+    },
+    web: {
+      bundler: "metro",
+      output: "static",
+      favicon: "./assets/images/favicon.png",
+    },
+    plugins: [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/images/splash.png",
+          imageWidth: 200,
+          resizeMode: "contain",
+          backgroundColor: "#ffffff",
+        },
+      ],
+    ],
+    experiments: {
+      typedRoutes: true,
+    },
+    extra: {
+      eas: {
+        projectId: "f10faf63-6374-4327-9f37-5acc1d11dfa7",
       },
     },
   },

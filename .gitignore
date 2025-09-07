@@ -30,6 +30,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
+.env
+
 # local env files
 .env*.local
 
@@ -37,3 +39,7 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Ignore native Android and iOS folders
+/android/
+/ios/
